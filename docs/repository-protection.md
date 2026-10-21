@@ -17,3 +17,9 @@ Also configure the repository to use read-only default workflow permissions, all
 The `npm` environment must have an explicit required reviewer and allow deployments only from the protected `main` branch. Publication requires an explicit manual workflow dispatch and a reviewed exact version/tag. npm's trusted publisher must separately name this repository, `npm-publish.yml`, and environment `npm`; GitHub protection alone does not establish that trust.
 
 For newly created repositories, bootstrap the initial authorized signed commit and `main` branch before enabling checks that require an existing commit context. Never disable an existing protection merely to bypass a failing check. After the first CI run, confirm the exact `required-checks` context is reported and enforced. Ruleset and environment application must be verified live and reported separately from local JSON validation.
+
+## Applied settings (2026-10-21)
+
+Live API read-back confirmed repository `sealad886/camofox-mcp` is public; main ruleset `25530588` is active, with `required-checks`, PR/thread/signature requirements, deletion and force-update blocks, and explicit administrator bypass. Release-tag ruleset `25530865` is active for `refs/tags/v*`, blocking updates, non-fast-forward changes and deletion except explicit administrator action. Its source is [release-tags.json](../.github/rulesets/release-tags.json).
+
+The npm environment has `sealad886` as required reviewer and a custom branch policy allowing only `main`. Workflow token defaults are read-only; workflow-created PRs are enabled for the manually invoked Release Please workflow. Vulnerability alerts, automated security updates, secret scanning/push protection, and private vulnerability reporting are enabled. These settings do not authorize an agent to publish, bypass protections, or merge.

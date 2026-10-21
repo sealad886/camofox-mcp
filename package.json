@@ -1,0 +1,49 @@
+{
+  "name": "@sealad886/camofox-mcp",
+  "version": "0.1.0",
+  "description": "Complete MCP tools and managed lifecycle for the Camofox browser",
+  "type": "module",
+  "license": "MIT",
+  "author": "Andrew Cox",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sealad886/camofox-mcp.git"
+  },
+  "homepage": "https://github.com/sealad886/camofox-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/sealad886/camofox-mcp/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "camofox-mcp": "src/cli.mjs"
+  },
+  "files": [
+    "src/",
+    "plugin/",
+    "docs/api/",
+    "vendor/CAMOFOX-LICENSE",
+    "README.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:live": "node --test test/live.browser.mjs",
+    "check": "node scripts/check-package.mjs",
+    "test:pack": "node scripts/test-pack.mjs",
+    "test:coverage": "node --test --experimental-test-coverage test/*.test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "ajv": "8.20.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "yaml": "2.9.1"
+  }
+}

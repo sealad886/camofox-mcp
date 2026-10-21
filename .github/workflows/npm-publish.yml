@@ -1,0 +1,105 @@
+name: Publish npm
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact existing vX.Y.Z tag to publish (without v)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: npm
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+      NPM_CONFIG_IGNORE_SCRIPTS: 'true'
+    steps:
+      - name: Validate explicit version
+        run: |
+          [[ "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo 'Expected a stable SemVer version'; exit 1; }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/v${{ inputs.version }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verify tagged source and package identity
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor HEAD origin/main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/v$RELEASE_VERSION^{commit}")"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          assert.equal(pkg.name, '@sealad886/camofox-mcp');
+          assert.equal(pkg.version, process.env.RELEASE_VERSION);
+          assert.equal(pkg.repository.url, 'git+https://github.com/sealad886/camofox-mcp.git');
+          JS
+      - name: Require npm CLI with trusted-publishing support
+        run: |
+          node --input-type=module <<'JS'
+          import { execFileSync } from 'node:child_process';
+          const [major, minor, patch] = execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim().split('.').map(Number);
+          if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) throw new Error('npm >=11.5.1 is required');
+          JS
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - run: npm test
+      - run: npm run test:pack
+      - name: Pack the exact artifact
+        run: |
+          mkdir release-artifacts
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.gitHead = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          JS
+          npm pack --json --ignore-scripts --pack-destination release-artifacts > release-artifacts/pack.json
+      - name: Inspect registry and publish only an unpublished exact version
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const [pack] = JSON.parse(fs.readFileSync('release-artifacts/pack.json', 'utf8'));
+          const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          const url = `https://registry.npmjs.org/@sealad886%2fcamofox-mcp/${process.env.RELEASE_VERSION}`;
+          const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+          if (response.ok) {
+            const published = await response.json();
+            assert.equal(published.gitHead, sha, 'Existing version belongs to a different Git commit');
+            assert.equal(published.dist.integrity, pack.integrity, 'Existing version has a different artifact');
+            console.log('Exact commit and artifact already published; no publication needed.');
+          } else if (response.status === 404) {
+            execFileSync('npm', ['publish', `release-artifacts/${pack.filename}`, '--access', 'public', '--provenance', '--ignore-scripts'], { stdio: 'inherit' });
+            const verified = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+            assert(verified.ok, 'Published version is not yet readable; check registry before rerunning');
+            const published = await verified.json();
+            assert.equal(published.dist.integrity, pack.integrity, 'Published integrity differs from approved artifact');
+            console.log(`Published ${published.name}@${published.version} with matching integrity.`);
+          } else throw new Error(`Registry returned ${response.status}; refusing to interpret it as a missing version.`);
+          JS
+      - name: Retain publication artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: npm-${{ inputs.version }}
+          path: release-artifacts/
+          retention-days: 30
+          if-no-files-found: ignore

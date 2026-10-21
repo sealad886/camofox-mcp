@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "camofox": {
+      "command": "node",
+      "args": [
+        "./scripts/launch.mjs"
+      ],
+      "cwd": ".",
+      "tool_timeout_sec": 180
+    }
+  }
+}

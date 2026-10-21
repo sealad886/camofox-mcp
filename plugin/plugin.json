@@ -1,0 +1,43 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "camofox-mcp",
+  "version": "0.1.0",
+  "description": "Complete MCP tools and managed setup for the Camofox headless browser.",
+  "author": {
+    "name": "Andrew Cox",
+    "url": "https://github.com/sealad886"
+  },
+  "homepage": "https://github.com/sealad886/camofox-mcp",
+  "repository": "https://github.com/sealad886/camofox-mcp",
+  "license": "MIT",
+  "keywords": [
+    "browser",
+    "headless",
+    "camofox",
+    "mcp"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Camofox Browser",
+        "shortDescription": "Private headless browsing",
+        "longDescription": "Control a local Camofox browser through complete MCP tools. Explicit setup installs the pinned server and browser engine. Managed sessions use a private authenticated loopback service; existing servers can also be connected.",
+        "developerName": "Andrew Cox",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Write",
+          "Interactive"
+        ],
+        "defaultPrompt": [
+          "Set up Camofox and check browser health.",
+          "Use Camofox to browse a website."
+        ],
+        "brandColor": "#315C50",
+        "composerIcon": "./assets/camofox.svg",
+        "logo": "./assets/camofox.svg",
+        "websiteURL": "https://github.com/sealad886/camofox-mcp"
+      }
+    }
+  }
+}

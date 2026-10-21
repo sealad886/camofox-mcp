@@ -1,0 +1,6 @@
+interface:
+  display_name: "Camofox Browser"
+  short_description: "Browse websites with a managed headless browser"
+  default_prompt: "Use Camofox Browser to complete the requested browsing task."
+policy:
+  allow_implicit_invocation: true
