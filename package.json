@@ -1,6 +1,6 @@
 {
   "name": "@sealad886/camofox-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Complete MCP tools and managed lifecycle for the Camofox browser",
   "type": "module",
   "license": "MIT",
