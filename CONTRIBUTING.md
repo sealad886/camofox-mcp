@@ -7,3 +7,12 @@ Work on a dedicated branch in the current checkout; worktrees require explicit i
 Use signed Conventional Commits. Changes need a pull request, current required checks, and resolved conversations. The sole repository owner may explicitly bypass under the documented policy. Never publish npm, create release tags, or alter remote protections solely because a commit or implementation was authorized.
 
 package.json is the release unit. Release Please writes versions and mirrors plugin manifests; do not add a second version writer. Never include tokens, cookie jars, profiles, downloaded browser binaries, generated runtime state, node_modules, or diagnostic dumps in commits or archives.
+
+## Plugin distribution
+
+The Codex plugin is distributed through the existing
+[`sealad886-codex-marketplace`](https://github.com/sealad886/sealad886-codex-marketplace),
+as `camofox-mcp@sealad886-codex-marketplace`. This repository owns the canonical
+`plugin/` package and npm runtime. Keep marketplace registration in the shared
+repository; do not add a second marketplace catalog here. Installation and setup
+must be verified through the shared marketplace.
