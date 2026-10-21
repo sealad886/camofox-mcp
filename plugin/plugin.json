@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "camofox-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Complete MCP tools and managed setup for the Camofox headless browser.",
   "author": {
     "name": "Andrew Cox",
