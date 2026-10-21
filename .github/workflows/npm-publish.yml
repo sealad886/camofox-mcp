@@ -87,7 +87,7 @@ jobs:
             assert.equal(published.dist.integrity, pack.integrity, 'Existing version has a different artifact');
             console.log('Exact commit and artifact already published; no publication needed.');
           } else if (response.status === 404) {
-            execFileSync('npm', ['publish', `release-artifacts/${pack.filename}`, '--access', 'public', '--provenance', '--ignore-scripts'], { stdio: 'inherit' });
+            execFileSync('npm', ['publish', `./release-artifacts/${pack.filename}`, '--access', 'public', '--provenance', '--ignore-scripts'], { stdio: 'inherit' });
             const verified = await fetch(url, { signal: AbortSignal.timeout(30_000) });
             assert(verified.ok, 'Published version is not yet readable; check registry before rerunning');
             const published = await verified.json();
