@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="460" viewBox="0 0 1440 460" role="img" aria-labelledby="title description">
+  <title id="title">Camofox MCP</title>
+  <desc id="description">A smiling fox peeks out of a browser window in a green camouflage forest, with leaves, stars, and the words Small fox. Big browser energy.</desc>
+  <defs>
+    <linearGradient id="forest" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#203d35"/>
+      <stop offset="1" stop-color="#315c50"/>
+    </linearGradient>
+    <clipPath id="frame"><rect width="1440" height="460" rx="28"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="1440" height="460" fill="url(#forest)"/>
+    <path d="M0 325C115 231 157 351 277 300S434 318 461 396L423 460H0Z" fill="#396555" opacity=".48"/>
+    <path d="M756 0c-45 84 39 107 7 169s24 110 109 74 120-18 131-92S933 43 975 0Z" fill="#1b342e" opacity=".38"/>
+    <path d="M1174 0c-52 62 10 100 68 94s59 92 120 105 93-30 103-79V0Z" fill="#547559" opacity=".42"/>
+    <path d="M1126 460c-5-93 65-129 124-105s73-55 128-70 96 32 101 82v93Z" fill="#1b342e" opacity=".42"/>
+    <g fill="#b0cba7" opacity=".55">
+      <path d="M80 78c32-15 53-3 58 18-23 11-48 4-58-18Z"/>
+      <path d="M1323 297c-25-2-40 10-42 31 25 2 43-11 42-31Z"/>
+      <path d="M710 353c8-25 25-32 44-25-7 24-25 34-44 25Z"/>
+    </g>
+    <g fill="none" stroke="#e0a96d" stroke-width="3" stroke-linecap="round" opacity=".8">
+      <path d="M747 67v18m-9-9h18M1328 120v20m-10-10h20M805 384v14m-7-7h14"/>
+    </g>
+    <g fill="#fff4e3" opacity=".6">
+      <circle cx="677" cy="103" r="3"/>
+      <circle cx="1366" cy="232" r="3"/>
+      <circle cx="880" cy="65" r="3"/>
+      <circle cx="1240" cy="397" r="3"/>
+    </g>
+    <g font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+      <text x="80" y="123" fill="#b0cba7" font-size="17" font-weight="650" letter-spacing="5">HEADLESS BROWSER · FULL OF CHARACTER</text>
+      <text x="76" y="217" fill="#fff4e3" font-size="83" font-weight="780" letter-spacing="-3">Camofox MCP</text>
+      <text x="80" y="273" fill="#f0d9b8" font-size="29" font-weight="450">Small fox. Big browser energy.</text>
+      <rect x="80" y="317" width="467" height="53" rx="14" fill="#19332c" stroke="#729482" stroke-opacity=".5"/>
+      <text x="100" y="351" fill="#d8e8d0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">$ navigate → snapshot → explore</text>
+      <rect x="514" y="333" width="9" height="21" rx="1" fill="#e0a96d"/>
+    </g>
+    <g transform="translate(885 79) rotate(4 186 140)">
+      <rect x="10" y="18" width="361" height="282" rx="24" fill="#142b25" opacity=".3"/>
+      <rect width="361" height="282" rx="24" fill="#fff4e3"/>
+      <path d="M24 0h313a24 24 0 0 1 24 24v29H0V24A24 24 0 0 1 24 0Z" fill="#b0cba7"/>
+      <circle cx="25" cy="27" r="5" fill="#315c50"/>
+      <circle cx="44" cy="27" r="5" fill="#52755d"/>
+      <circle cx="63" cy="27" r="5" fill="#729482"/>
+      <rect x="92" y="16" width="235" height="23" rx="7" fill="#fff4e3" opacity=".68"/>
+      <path d="M107 27h86" stroke="#729482" stroke-width="4" stroke-linecap="round"/>
+      <g transform="translate(52 55) scale(2.02)">
+        <rect width="128" height="102" rx="21" fill="#315c50"/>
+        <path d="m28 12 24 16h24l24-16-9 54-27 20-27-20Z" fill="#e0a96d"/>
+        <path d="m37 42 27 19 27-19-4 24-23 17-23-17Z" fill="#fff4e3"/>
+        <path d="m51 47 6 8m20-8-6 8" stroke="#203d35" stroke-width="7" stroke-linecap="round"/>
+        <path d="m56 65 8-4 8 4-8 9Z" fill="#203d35"/>
+        <path d="M61 76q3 5 6 0" fill="none" stroke="#203d35" stroke-width="2" stroke-linecap="round"/>
+      </g>
+    </g>
+    <g transform="translate(1210 326) rotate(-8)">
+      <rect width="139" height="49" rx="14" fill="#e0a96d"/>
+      <text x="69.5" y="31" text-anchor="middle" fill="#203d35" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="700">{ 46 tools }</text>
+    </g>
+  </g>
+</svg>

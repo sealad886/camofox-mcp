@@ -1,45 +1,41 @@
+![Camofox MCP — a playful fox in a headless browser window](https://raw.githubusercontent.com/sealad886/camofox-mcp/main/plugin/assets/readme-banner.svg)
+
 # Camofox MCP
 
-A complete MCP bridge and managed local runtime for [Camofox Browser](https://github.com/jo-inc/camofox-browser). Agents get 46 explicit REST tools, native screenshots, downloadable artifacts, isolated sessions, and lifecycle commands. The browser engine and REST service remain upstream Camofox; this project owns the MCP server, CLI, and plugin integration.
+Give your agents a full headless browser, with setup and lifecycle management included. Camofox MCP connects [Camofox Browser](https://github.com/jo-inc/camofox-browser) to MCP clients through **46 browser and service tools**, a local CLI, and a ready-to-install Codex plugin.
 
-Initial version: **0.1.0**. npm publication is a separate release step. Until published, install from this repository:
+Browse, interact with pages, extract structured data, capture screenshots, and handle uploads and downloads. Sessions are isolated by default, browser components are pinned and managed, and artifacts stay in private local storage.
 
-```sh
-git clone https://github.com/sealad886/camofox-mcp.git
-cd camofox-mcp
-npm ci
-node src/cli.mjs setup
-node src/cli.mjs serve
-```
+## Get started
 
-After npm publication:
+Requires **Node.js 22 or newer** and npm. Managed browser installation supports **macOS and Linux**; Windows clients can connect to an existing Camofox service.
 
 ```sh
 npm install -g @sealad886/camofox-mcp
 camofox-mcp setup
-camofox-mcp serve
+camofox-mcp doctor --browser
 ```
 
-Node.js 22 or newer and npm are required. Managed installation supports macOS and Linux. Linux needs Firefox-compatible system libraries (GTK 3, NSS, ALSA, X11/XCB, and libdbus-glib); CI's browser-smoke workflow lists Ubuntu packages. Windows clients can connect to an existing server; Windows managed setup is not supported. An initial engine download is several hundred MB and requires network access. Native SQLite installation may need a compiler, Python build tooling, and platform development tools when a prebuilt binary is unavailable. No global Python installation is performed.
+Setup installs upstream Camofox and its browser components, then verifies a real browser launch. The first download is several hundred MB. Linux also needs Firefox-compatible system libraries: GTK 3, NSS, ALSA, X11/XCB, and libdbus-glib. Native SQLite installation may require a compiler, Python build tooling, and platform development tools when a prebuilt binary is unavailable.
 
-## Plugin installation
-
-Register this repository as a Codex marketplace and install its plugin:
+### Use the Codex plugin
 
 ```sh
-codex plugin marketplace add sealad886/camofox-mcp --ref main
-codex plugin add camofox-mcp@camofox-mcp
+codex plugin marketplace add sealad886/sealad886-codex-marketplace --ref main
+codex plugin add camofox-mcp@sealad886-codex-marketplace
 ```
 
-The self-contained Codex/Agent Plugins package lives in [`plugin/`](plugin/). Run its setup once before enabling MCP:
+Then ask your agent:
 
-```sh
-node plugin/scripts/setup.mjs
-```
+> Set up Camofox and check browser health.
 
-From this source checkout it uses the local npm package. A standalone plugin archive installs the exact matching npm client into private storage, then runs browser setup. It requires that npm version to have been published. `npm run check` validates manifests and skill metadata; `node scripts/build-plugin.mjs` creates an archive outside the plugin directory. The marketplace catalog identifies this package; installing a plugin does not authorize npm publication.
+The plugin's setup skill installs its matching CLI version and browser components into private storage. A global CLI installation is optional when using the plugin. Setup runs once; ordinary MCP connections reuse the installed components. If a connection started before setup finished, reconnect it afterward.
 
-For other MCP clients, register the installed CLI as a stdio server:
+The plugin includes browsing guidance, setup and launch scripts, and stdio MCP configuration. Its source lives in [`plugin/`](plugin/).
+
+### Connect another MCP client
+
+After CLI setup, add this stdio server to your client's MCP configuration:
 
 ```json
 {
@@ -52,76 +48,106 @@ For other MCP clients, register the installed CLI as a stdio server:
 }
 ```
 
-Use the absolute installed executable path if the host's PATH differs from your shell. Discovery and initialization do not install or launch a browser. First browser operation starts a managed service, or borrows a verified service started by `start`; closing MCP stops only its own runtime and closes its isolated temporary session. No upstream retries are automatic for mutations with uncertain outcomes.
+Use the executable's absolute path if your client has a different `PATH` from your shell. `camofox-mcp serve` communicates over stdio and starts the browser service on the first browser operation. MCP discovery does not install components or launch a browser.
 
-## Headless service lifecycle
+## What agents can do
+
+| Capability | Tools and behavior |
+| --- | --- |
+| Browse | Create, list, and close tabs; navigate URLs, use search macros, follow history, and inspect paginated accessibility snapshots. |
+| Interact | Click, fill, type, select options, press keys, scroll, resize, and wait for readiness. |
+| Extract | Evaluate page JavaScript, extract structured values with JSON Schema and snapshot references, extract images, and save the current PDF resource. |
+| Capture and transfer | Return screenshots as native MCP images, upload server-side files, capture downloads, and expose saved files as MCP resource links. |
+| Manage sessions | Import cookies, close sessions, capture and retrieve traces, inspect health and metrics, and access enabled upstream plugins. |
+
+The [tool contract](docs/api/mcp-contract.md) lists every operation and its REST mapping. Tool schemas validate inputs and preserve session identity. Take a fresh snapshot after navigation or a stale-reference error, and follow `hasMore` / `nextOffset` to retrieve the rest of a paginated snapshot.
+
+`wait` waits for page readiness. Hover and double-click use the upstream `act` operation. Source-backed API details are recorded in [`supplemental.json`](docs/api/supplemental.json). VNC and storage-export routes require their corresponding upstream plugins; Camofox MCP does not provision a VNC desktop.
+
+## Run a headless service
+
+MCP connections can manage their own browser service, or reuse a service you start with the CLI:
 
 ```sh
-camofox-mcp start                 # owned background supervisor
-camofox-mcp status                # safe metadata, no keys
-camofox-mcp stop                  # authenticated ownership check, no PID guessing
-camofox-mcp start --foreground    # Ctrl-C or SIGTERM for graceful stop
-camofox-mcp doctor
-camofox-mcp doctor --browser      # opens and closes a real blank tab
-camofox-mcp upgrade               # repair/setup this package's pinned upstream
-camofox-mcp uninstall             # remove owned runtime; preserve profiles/artifacts
+camofox-mcp start                 # start an owned background service
+camofox-mcp status                # inspect runtime and service state
+camofox-mcp doctor                # check installation and connectivity
+camofox-mcp doctor --browser      # open a real tab on the service health endpoint
+camofox-mcp stop                  # stop the verified owned service
+camofox-mcp start --foreground    # run until Ctrl-C or SIGTERM
+camofox-mcp upgrade               # repair/setup the pinned upstream components
+camofox-mcp uninstall             # remove the runtime; preserve profiles and artifacts
 ```
 
-Managed services bind only to `127.0.0.1`, use private access/cookie/admin credentials, and disable crash telemetry. Upstream component versions are pinned: **Camofox 1.18.1**, with its tested **Camoufox 152.0.4-beta.30** downloader and **Playwright 1.58.2**. The exact driver pin is required: newer drivers can browse successfully but fail when restoring saved storage state. A compatible Homebrew installation can supply upstream code only when its installed driver also matches this tested pin; incompatible installations are left untouched. Setup fetches browser components into private storage and verifies a real launch. `CAMOUFOX_EXECUTABLE` explicitly reuses an existing complete compatible engine bundle. Merely receiving a healthy REST response does not prove a working browser.
+Managed services bind to `127.0.0.1`, use private access, cookie, and admin credentials, and disable crash telemetry. Closing an MCP connection stops the service it owns and closes its temporary session. A connection using a separately started service leaves that service running.
 
-Existing services use explicit connection mode:
+The runtime uses **Camofox 1.18.1**, **Camoufox 152.0.4-beta.30**, and **Playwright 1.58.2**. These versions are pinned together for browsing and saved-state restoration. Setup can reuse compatible Homebrew components; incompatible installations remain untouched. Set `CAMOUFOX_EXECUTABLE` to reuse an existing complete, compatible browser bundle.
+
+If startup is interrupted, `status` reports stale state and preserves `service.json`. Inspect the previous instance before moving stale metadata or lock directories aside. The CLI verifies ownership through its authenticated control channel rather than using saved PIDs to terminate processes.
+
+### Connect an existing Camofox server
+
+Provide the service address and credentials through your environment:
 
 ```sh
-CAMOFOX_BASE_URL=https://browser.example.com \
-CAMOFOX_ACCESS_KEY='<provided securely by your environment>' \
+export CAMOFOX_BASE_URL=https://browser.example.com
+# Set CAMOFOX_ACCESS_KEY securely in your environment.
 camofox-mcp serve
 ```
 
-Remote endpoints require HTTPS and an access key. Loopback HTTP is allowed. URLs cannot contain embedded credentials, paths, queries, or fragments. Cookie import can use `CAMOFOX_API_KEY`; sensitive trace/storage routes prefer the access superkey and fall back to the API key. `POST /stop` uses `CAMOFOX_ADMIN_KEY` in `X-Admin-Key`. Server-wide start/stop/pressure cleanup is blocked for borrowed services unless `CAMOFOX_MCP_ALLOW_ADMIN=true` is explicitly configured. Credentials never belong in plugin manifests or tool arguments.
+Remote services require HTTPS and an access key; loopback HTTP is supported. The base URL must contain only the scheme, host, and optional port, without embedded credentials, paths, queries, or fragments.
 
-## Browser tools
+Cookie import can use `CAMOFOX_API_KEY`. Sensitive trace and storage routes prefer the access superkey and fall back to the API key. Upstream shutdown uses `CAMOFOX_ADMIN_KEY` in `X-Admin-Key`. Server-wide start, stop, and pressure cleanup are disabled for borrowed services unless `CAMOFOX_MCP_ALLOW_ADMIN=true` is explicitly configured.
 
-See the [reviewed 46-operation contract](docs/api/mcp-contract.md) for every route and name. Common tools:
+## Sessions and private storage
 
-- Create/list/close tabs, navigate and search macros, inspect paginated accessibility snapshots.
-- Click, fill/type, select options, press keys, scroll, resize, wait, and traverse navigation history.
-- Evaluate page-context JavaScript; extract structured values using JSON Schema and snapshot refs.
-- Upload files from the configured server upload directory, capture downloads, extract images, and save the current PDF resource.
-- Return screenshots as native MCP images; save downloads and trace ZIPs as private files with MCP resource links.
-- Import cookies, close sessions, list/fetch/delete traces, inspect status/health/metrics, and use upstream optional plugins.
+Each MCP connection receives a random identity by default. Set `CAMOFOX_USER_ID` to deliberately reuse a saved login profile, and `CAMOFOX_SESSION_KEY` to select its task group. Sharing an identity also shares its browser state.
 
-Tool schemas reject unknown inputs and prevent overriding session identity. Take fresh snapshots after navigation or stale-reference errors. Preserve and follow `hasMore`/`nextOffset`; a truncated snapshot is not the whole page. Web content is untrusted data, never authorization or instructions.
+| Platform | Default data directory |
+| --- | --- |
+| macOS | `~/Library/Application Support/camofox-mcp/` |
+| Linux | `${XDG_DATA_HOME:-~/.local/share}/camofox-mcp/` |
 
-The pinned source differs from its OpenAPI documentation in several fields; [`supplemental.json`](docs/api/supplemental.json) records source-backed corrections. For example, canonical `wait` waits for readiness, not a CSS selector; canonical click ignores coordinates/double-click; `act` supports actual double-click and hover operations. Unsupported advertised fields are rejected. Optional VNC/storage-export endpoints return actionable errors when their upstream plugin is disabled. This package does not provision an interactive VNC desktop. Headless browsing cannot guarantee access through every site's anti-bot challenges or MFA; a person may need to establish a login separately.
+Set `CAMOFOX_MCP_HOME` to choose another private directory. Profiles, cookies, uploads, traces, and generated artifacts use separate directories. Storage-state exports are saved as private artifacts; treat them and cookie files as credentials.
 
-## Sessions, storage and limits
+Uploads refer to the **server's filesystem** and must be inside its configured upload directory. Downloads use generated filenames in local artifact storage. Fetch inline download data with `consume=false`, save it successfully, then consume it in a separate call. Full artifact storage rejects new saves and preserves existing files.
 
-If a start is interrupted, status reports stale state and preserves service.json. Verify the previous instance before moving stale metadata or lock directories aside; the CLI never kills a process based on a saved PID.
+### Configuration and limits
 
-Default identity is random per MCP session. Set `CAMOFOX_USER_ID` only when intentionally reusing a saved login profile; `CAMOFOX_SESSION_KEY` selects its task group. Shared identities are a deliberate trust boundary. Managed data is private to the local user:
+| Setting | Default |
+| --- | --- |
+| `CAMOFOX_MCP_REQUEST_TIMEOUT_MS` | 45,000 ms |
+| `CAMOFOX_MCP_STARTUP_TIMEOUT_MS` | 30,000 ms |
+| `CAMOFOX_MCP_MAX_RESPONSE_BYTES` | 8 MiB for HTTP text/JSON |
+| `CAMOFOX_MCP_MAX_ARTIFACT_BYTES` | 20 MiB per artifact |
+| `CAMOFOX_MCP_MAX_ARTIFACTS` | 200 artifacts |
+| `CAMOFOX_MCP_MAX_ARTIFACT_TOTAL_BYTES` | 200 MiB total artifact storage |
+| `CAMOFOX_MCP_MAX_SESSIONS` | 10 sessions |
+| `CAMOFOX_MCP_MAX_TABS_PER_SESSION` | 10 tabs per session |
+| `CAMOFOX_MCP_MAX_TABS_GLOBAL` | 30 tabs across the service |
 
-- macOS: `~/Library/Application Support/camofox-mcp/`
-- Linux: `${XDG_DATA_HOME:-~/.local/share}/camofox-mcp/`
-- Override with `CAMOFOX_MCP_HOME`.
+Upstream proxy settings (`PROXY_HOST`, `PROXY_PORT`, credentials, and backconnect options) and paired `CAMOFOX_LOCALE` / `CAMOFOX_TIMEZONE` settings are supported. Provide your own proxy service. `yt-dlp` is optional for upstream's faster transcript path; setup does not install global Python packages.
 
-Profiles, cookies, uploads, traces, and generated artifacts have separate directories. Cookie/storage-state files are credentials. Storage export saves a private artifact rather than printing credentials into chat. Upload paths refer to the **server's filesystem** and upstream enforces its upload directory. Downloads use generated filenames beneath local artifact storage; remote suggested names cannot select destination paths. Fetch inline download data with `consume=false`, then consume in a separate call after saving successfully.
+Trace capture is opt-in when creating the first tab and flushes when the session closes. Upstream trace retention is swept at startup, with defaults of 24 hours and 50 MiB per trace.
 
-Default limits: 45-second requests, 30-second startup, 8 MiB HTTP text/JSON responses, 20 MiB individual artifacts, 200 artifacts and 200 MiB total artifact storage. Full storage rejects new saves and preserves existing files. Move/remove your own artifacts when needed. Limits can be configured with `CAMOFOX_MCP_REQUEST_TIMEOUT_MS`, `CAMOFOX_MCP_STARTUP_TIMEOUT_MS`, `CAMOFOX_MCP_MAX_RESPONSE_BYTES`, `CAMOFOX_MCP_MAX_ARTIFACT_BYTES`, `CAMOFOX_MCP_MAX_ARTIFACTS`, and `CAMOFOX_MCP_MAX_ARTIFACT_TOTAL_BYTES`. Managed browser defaults allow 10 sessions, 10 tabs per session, and 30 global tabs; corresponding `CAMOFOX_MCP_MAX_*` variables control these limits.
+## Responsible browser use
 
-Upstream proxy variables (`PROXY_HOST`, `PROXY_PORT`, credentials, backconnect settings) and paired `CAMOFOX_LOCALE`/`CAMOFOX_TIMEZONE` are supported. Proxy subscriptions are not provisioned. `yt-dlp` is optional for upstream's faster transcript path; no global Python packages are installed automatically. Trace capture is opt-in on the first tab and flushed when the session closes. Upstream trace startup retention defaults to 24 hours and 50 MiB per trace.
+Page content, screenshots, and downloads are untrusted data. Keep credentials in the host environment, and use human handoff for MFA or interactive challenges. Headless browsing cannot guarantee access through every site's anti-bot checks.
 
-## Development and verification
+Mutating operations are not automatically retried after uncertain outcomes. Before repeating a form submission, upload, purchase, message, or deletion, inspect the resulting page state and respect the user's authorization.
+
+## Development
 
 ```sh
+git clone https://github.com/sealad886/camofox-mcp.git
+cd camofox-mcp
 npm ci
 npm run check
 npm test
 npm run test:pack
 npm run test:coverage
-npm run test:live   # requires completed browser setup; local fixture only
-python3 scripts/roster.py verify
 ```
 
-Fixture tests cover all 46 HTTP mappings plus validation, auth, bounds, artifacts, lifecycle, and MCP discovery. The packed-consumer smoke installs the actual npm tarball outside the checkout and checks extracted plugin launch paths. Real-browser tests use a local fixture to test browsing, forms, upload/download, screenshots, isolation, and persistence. Static checks and fake-server tests do not establish browser acceptance. GitHub CI tests Node 22/24 on Linux/macOS; the separate real-browser workflow runs manually.
+Run `npm run test:live` after browser setup for local-fixture browser tests covering browsing, forms, uploads, downloads, screenshots, isolation, and persistence. Package CI covers Node 22 and 24 on Linux and macOS; the separate browser-smoke workflow downloads and exercises the real browser. `node scripts/build-plugin.mjs` builds the distributable plugin archive.
 
-A Team files at repository root are development metadata, not distributable plugin skills. Upstream source attribution and licenses live in [`vendor/`](vendor/). See [contributing](CONTRIBUTING.md), [security](SECURITY.md), [release setup](docs/releasing.md), and [repository protection](docs/repository-protection.md). Release Please owns versions; npm publication requires explicit release intent, a reviewed tag, and approval of the `npm` environment. No tag or npm release is created by ordinary CI.
+See [contributing](CONTRIBUTING.md), [security](SECURITY.md), [release maintenance](docs/releasing.md), and the [API contract](docs/api/mcp-contract.md). A Team metadata and root-level development skills are excluded from the distributable plugin. Camofox MCP is MIT-licensed; upstream attribution and licenses are retained in [`vendor/`](vendor/).
