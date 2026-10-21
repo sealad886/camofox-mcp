@@ -1,0 +1,491 @@
+{
+  "description": "Source-audited additions and corrections to pinned Camofox 1.18.1. Merge parameters by (in,name), recursively merge body properties, remove x-remove-body-properties; do not replace whole existing operations. Six additional operations, total 46.",
+  "upstreamCommit": "39c82094013480b373df6600d44c7f036f58356e",
+  "paths": {
+    "/openapi.json": {
+      "get": {
+        "summary": "Read upstream OpenAPI specification",
+        "responses": {
+          "200": {
+            "description": "Successful upstream result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unavailable route, session, or artifact"
+          },
+          "422": {
+            "description": "Invalid operation input"
+          },
+          "500": {
+            "description": "Upstream operation failed"
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "summary": "Read upstream API documentation HTML",
+        "responses": {
+          "200": {
+            "description": "Successful upstream result",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unavailable route, session, or artifact"
+          },
+          "422": {
+            "description": "Invalid operation input"
+          },
+          "500": {
+            "description": "Upstream operation failed"
+          }
+        }
+      }
+    },
+    "/vnc/status": {
+      "get": {
+        "summary": "Read optional VNC plugin status",
+        "responses": {
+          "200": {
+            "description": "Successful upstream result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unavailable route, session, or artifact"
+          },
+          "422": {
+            "description": "Invalid operation input"
+          },
+          "500": {
+            "description": "Upstream operation failed"
+          }
+        }
+      }
+    },
+    "/sessions/{userId}/storage_state": {
+      "get": {
+        "summary": "Export active session storage; requires upstream VNC plugin",
+        "responses": {
+          "200": {
+            "description": "Successful upstream result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unavailable route, session, or artifact"
+          },
+          "422": {
+            "description": "Invalid operation input"
+          },
+          "500": {
+            "description": "Upstream operation failed"
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Reset live and persisted storage; requires persistence plugin",
+        "responses": {
+          "200": {
+            "description": "Successful upstream result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unavailable route, session, or artifact"
+          },
+          "422": {
+            "description": "Invalid operation input"
+          },
+          "500": {
+            "description": "Upstream operation failed"
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/youtube/transcript": {
+      "post": {
+        "summary": "Extract YouTube transcript through optional upstream plugin",
+        "responses": {
+          "200": {
+            "description": "Successful upstream result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unavailable route, session, or artifact"
+          },
+          "422": {
+            "description": "Invalid operation input"
+          },
+          "500": {
+            "description": "Upstream operation failed"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "languages": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "default": [
+                      "en"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tabs/{tabId}/downloads": {
+      "get": {
+        "parameters": [
+          {
+            "name": "includeData",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "consume",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "maxBytes",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/tabs/{tabId}/images": {
+      "get": {
+        "parameters": [
+          {
+            "name": "includeData",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "maxBytes",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          }
+        ]
+      }
+    },
+    "/tabs/{tabId}/links": {
+      "get": {
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/tabs/{tabId}/screenshot": {
+      "get": {
+        "parameters": [
+          {
+            "name": "fullPage",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ]
+      }
+    },
+    "/tabs/{tabId}/wait": {
+      "post": {
+        "x-remove-body-properties": [
+          "selector"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "waitForNetwork": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "dismissConsent": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "timeout": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 120000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tabs/{tabId}/type": {
+      "post": {
+        "x-remove-body-properties": [
+          "clear"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "fill",
+                      "keyboard"
+                    ],
+                    "default": "fill"
+                  },
+                  "delay": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000,
+                    "default": 30
+                  },
+                  "pressEnter": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/act": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "click",
+                      "type",
+                      "press",
+                      "scroll",
+                      "scrollIntoView",
+                      "hover",
+                      "wait",
+                      "close"
+                    ]
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "fill",
+                      "keyboard"
+                    ]
+                  },
+                  "delay": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000
+                  },
+                  "submit": {
+                    "type": "boolean"
+                  },
+                  "doubleClick": {
+                    "type": "boolean"
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "timeMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 120000
+                  },
+                  "loadState": {
+                    "type": "string",
+                    "enum": [
+                      "load",
+                      "domcontentloaded",
+                      "networkidle"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tabs/{tabId}/click": {
+      "post": {
+        "x-remove-body-properties": [
+          "doubleClick",
+          "coordinates"
+        ]
+      }
+    }
+  }
+}
