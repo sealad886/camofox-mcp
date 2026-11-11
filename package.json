@@ -36,7 +36,7 @@
     "test:coverage": "node --test --experimental-test-coverage test/*.test.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.32.1",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "ajv": "8.20.0"
   },
   "publishConfig": {
