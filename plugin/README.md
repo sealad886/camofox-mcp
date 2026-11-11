@@ -1,3 +1,5 @@
+![Camofox Browser — Small fox. Big browser energy.](assets/readme-banner.svg)
+
 # Camofox Browser
 
 A full headless browser for agents, with 46 MCP tools and managed setup for the Camofox server and browser engine. Browse, interact with forms, extract structured data, take screenshots, and handle uploads and downloads in isolated sessions.
