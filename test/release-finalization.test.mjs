@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { parse } from 'yaml';
 import { finalizeRelease } from '../scripts/finalize-release.mjs';
 
 const sha = 'a'.repeat(40);
@@ -7,6 +9,8 @@ const version = '0.1.2';
 const integrity = 'sha512-exact-artifact';
 const repository = 'sealad886/camofox-mcp';
 const pending = 'autorelease: pending';
+const workflow = parse(readFileSync(new URL('../.github/workflows/npm-publish.yml', import.meta.url), 'utf8'));
+const permissions = workflow.jobs.publish.permissions;
 const pull = () => ({
   number: 7, merged_at: '2026-11-11T01:00:00Z', merge_commit_sha: sha,
   user: { login: 'github-actions[bot]' },
@@ -21,6 +25,8 @@ function fixture({ published = {}, pulls = [pull()], manifestVersion = version, 
   const request = async (url, options = {}) => {
     const path = new URL(url).pathname;
     if (options.method === 'DELETE') {
+      // Model the observed pull-request-scoped authorization boundary.
+      if (permissions['pull-requests'] !== 'write') return { ok: false, status: 403 };
       writes.push({ path, method: options.method });
       return { ok: true, status: 200, json: async () => [{ name: 'keep-me' }] };
     }
