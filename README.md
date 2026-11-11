@@ -2,7 +2,7 @@
 
 # Camofox MCP
 
-Give your agents a full headless browser, with setup and lifecycle management included. Camofox MCP connects [Camofox Browser](https://github.com/jo-inc/camofox-browser) to MCP clients through **46 browser and service tools**, a local CLI, and a ready-to-install Codex plugin.
+Give your agents a full headless browser, with setup and lifecycle management included. Camofox MCP connects [Camofox Browser](https://github.com/jo-inc/camofox-browser) to MCP clients through **46 browser and service tools**, a local CLI, and a shared plugin for Codex, GitHub Copilot and Claude Code.
 
 Browse, interact with pages, extract structured data, capture screenshots, and handle uploads and downloads. Sessions are isolated by default, browser components are pinned and managed, and artifacts stay in private local storage.
 
@@ -32,6 +32,18 @@ Then ask your agent:
 The plugin's setup skill installs its matching CLI version and browser components into private storage. A global CLI installation is optional when using the plugin. Setup runs once; ordinary MCP connections reuse the installed components. If a connection started before setup finished, reconnect it afterward.
 
 The plugin includes browsing guidance, setup and launch scripts, and stdio MCP configuration. Its source lives in [`plugin/`](plugin/).
+
+### Use the Claude Code plugin
+
+```sh
+claude plugin marketplace add sealad886/sealad886-codex-marketplace
+claude plugin install camofox-mcp@sealad886-codex-marketplace
+```
+
+Start a fresh session and invoke `/camofox-mcp:camofox`. It uses the same setup
+skill, exact npm client version and stdio runtime as the Codex plugin. No browser
+download occurs during MCP discovery. The marketplace keeps the existing GitHub
+Copilot catalog and portable package alongside the Claude metadata.
 
 ### Connect another MCP client
 

@@ -1,0 +1,26 @@
+{
+  "name": "camofox-mcp",
+  "version": "0.1.1",
+  "description": "Complete MCP tools and managed setup for the Camofox headless browser.",
+  "author": {
+    "name": "Andrew Cox",
+    "url": "https://github.com/sealad886"
+  },
+  "homepage": "https://github.com/sealad886/camofox-mcp",
+  "repository": "https://github.com/sealad886/camofox-mcp",
+  "license": "MIT",
+  "keywords": [
+    "browser",
+    "headless",
+    "camofox",
+    "mcp"
+  ],
+  "mcpServers": {
+    "camofox": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/launch.mjs"
+      ]
+    }
+  }
+}

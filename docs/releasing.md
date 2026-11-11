@@ -1,6 +1,6 @@
 # Releases
 
-The npm package owns the version. Release Please mirrors that version into both plugin manifests and the release manifest; do not bump these independently. All commands below are release operations for a maintainer to run deliberately. Adding these workflows does not publish a package or configure npm trust.
+The npm package owns the version. Release Please mirrors that version into all three plugin manifests and the release manifest; do not bump these independently. All commands below are release operations for a maintainer to run deliberately. Adding these workflows does not publish a package or configure npm trust.
 
 ## One-time configuration
 
@@ -18,7 +18,7 @@ Manually run **Release PR** (`release-please.yml`) from `main`. It opens or upda
 
 GitHub suppresses most workflow events produced by `GITHUB_TOKEN`. A release PR created with that token may need an explicit **CI** workflow dispatch on the release branch so its commit receives `required-checks`. Use the GitHub workflow branch selector. A separately configured GitHub App token can automate that later; no such token is bundled.
 
-Review the entire release diff, changelog, npm lockfile, and both plugin versions. Run `npm ci --ignore-scripts`, `npm run check`, `npm test`, `npm run test:pack`, and the real-browser smoke test before authorizing a release. Normal package CI deliberately does not download a browser. The **Real browser smoke** workflow performs that download only when dispatched.
+Review the entire release diff, changelog, npm lockfile, and all three plugin versions. Run `npm ci --ignore-scripts`, `npm run check`, `npm test`, `npm run test:pack`, and the real-browser smoke test before authorizing a release. Normal package CI deliberately does not download a browser. The **Real browser smoke** workflow performs that download only when dispatched.
 
 ## Publish an authorized version
 
