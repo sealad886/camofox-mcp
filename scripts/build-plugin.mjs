@@ -21,7 +21,7 @@ await check(plugin);
 await mkdir(path.dirname(output), { recursive: true });
 await promisify(execFile)('tar', ['-czf', output, '-C', plugin, '.'], { timeout: 30_000 });
 const { stdout } = await promisify(execFile)('tar', ['-tzf', output]);
-for (const required of ['./plugin.json', './mcp.json', './.mcp.json', './.codex-plugin/plugin.json', './skills/camofox/SKILL.md', './scripts/launch.mjs', './scripts/setup.mjs', './scripts/runtime-paths.mjs']) {
+for (const required of ['./plugin.json', './mcp.json', './.mcp.json', './.codex-plugin/plugin.json', './.claude-plugin/plugin.json', './skills/camofox/SKILL.md', './scripts/launch.mjs', './scripts/setup.mjs', './scripts/runtime-paths.mjs']) {
   if (!stdout.split('\n').includes(required)) throw new Error(`Archive missing ${required}`);
 }
 console.log(output);

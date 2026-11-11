@@ -1,8 +1,26 @@
+![Camofox Browser — Small fox. Big browser energy.](assets/readme-banner.svg)
+
 # Camofox Browser
 
 A full headless browser for agents, with 46 MCP tools and managed setup for the Camofox server and browser engine. Browse, interact with forms, extract structured data, take screenshots, and handle uploads and downloads in isolated sessions.
 
-## Install
+## Claude Code installation
+
+```sh
+claude plugin marketplace add sealad886/sealad886-codex-marketplace
+claude plugin install camofox-mcp@sealad886-codex-marketplace
+```
+
+Start a fresh session and invoke `/camofox-mcp:camofox`. Claude Code loads the
+same skill and runtime as Codex and GitHub Copilot. Node.js 22+ and the setup
+prerequisites below apply in every client. Run setup only when its browser and
+npm downloads are authorized; installation alone does not grant tool permissions.
+
+The Claude manifest resolves the launcher through `${CLAUDE_PLUGIN_ROOT}` so the
+server does not depend on the session's working directory. The plugin installs
+its exact matching npm client version into private storage before browser setup.
+
+## Install in Codex
 
 ```sh
 codex plugin marketplace add sealad886/sealad886-codex-marketplace --ref main

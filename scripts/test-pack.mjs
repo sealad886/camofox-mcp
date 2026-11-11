@@ -21,7 +21,7 @@ try {
   const { stdout } = await run(npm, ['pack', '--json', '--ignore-scripts', '--pack-destination', temporary]);
   const [packed] = JSON.parse(stdout);
   const names = packed.files.map(file => file.path);
-  for (const required of ['src/cli.mjs', 'plugin/plugin.json', 'plugin/.codex-plugin/plugin.json', 'plugin/.mcp.json', 'plugin/mcp.json', 'plugin/scripts/setup.mjs', 'plugin/scripts/launch.mjs', 'plugin/scripts/runtime-paths.mjs', 'plugin/skills/camofox/SKILL.md', 'docs/api/camofox-1.18.1.openapi.json', 'vendor/CAMOFOX-LICENSE', 'README.md', 'SECURITY.md', 'LICENSE']) assert(names.includes(required), `Packed artifact missing ${required}`);
+  for (const required of ['src/cli.mjs', 'plugin/plugin.json', 'plugin/.codex-plugin/plugin.json', 'plugin/.claude-plugin/plugin.json', 'plugin/.mcp.json', 'plugin/mcp.json', 'plugin/scripts/setup.mjs', 'plugin/scripts/launch.mjs', 'plugin/scripts/runtime-paths.mjs', 'plugin/skills/camofox/SKILL.md', 'docs/api/camofox-1.18.1.openapi.json', 'vendor/CAMOFOX-LICENSE', 'README.md', 'SECURITY.md', 'LICENSE']) assert(names.includes(required), `Packed artifact missing ${required}`);
   for (const name of names) assert(!/(^|\/)(?:\.git|\.agent-sync|\.claude|node_modules|\.env)(?:\/|$)|^skills\/|\.pem$|\.key$/.test(name), `Unexpected private/development artifact: ${name}`);
   const rootPackage = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
   const runtimeHome = path.join(temporary, 'runtime-home');
@@ -44,12 +44,18 @@ try {
   env.CAMOFOX_MCP_HOME = path.join(temporary, 'missing-home');
   await assert.rejects(run(process.execPath, [path.join(standalone, 'scripts', 'launch.mjs')], { cwd: temporary, env, timeout: 5_000 }), error => error.code === 1 && /not installed.*setup[.]mjs/s.test(error.stderr));
   env.CAMOFOX_MCP_HOME = runtimeHome;
-  transport = new StdioClientTransport({ command: process.execPath, args: [path.join(standalone, 'scripts', 'launch.mjs')], env, stderr: 'pipe' });
+  // Use the shipped Claude declaration from outside the standalone plugin root.
+  const claude = JSON.parse(await readFile(path.join(standalone, '.claude-plugin', 'plugin.json'), 'utf8'));
+  assert.equal(claude.version, pkg.version, 'Packed Claude version must match its npm runtime');
+  const server = claude.mcpServers.camofox;
+  const args = server.args.map(value => value.replaceAll('${CLAUDE_PLUGIN_ROOT}', standalone));
+  assert(args.every(value => !value.includes('${CLAUDE_PLUGIN_ROOT}')), 'Claude launcher root must resolve');
+  transport = new StdioClientTransport({ command: server.command, args, env, stderr: 'pipe' });
   client = new Client({ name: 'packed-consumer-smoke', version: '1.0.0' }, { capabilities: {} });
   await client.connect(transport, { timeout: 15_000 });
   const tools = await client.listTools({}, { timeout: 15_000 });
   assert(tools.tools.length > 0, 'Packed client returned no MCP tools');
-  console.log(`Packed ${names.length} files; isolated npm install, CLI help, standalone plugin missing-setup behavior, MCP initialization, and ${tools.tools.length} tools passed without a browser.`);
+  console.log(`Packed ${names.length} files; isolated npm install, CLI help, standalone plugin missing-setup behavior, Claude-declared MCP initialization, and ${tools.tools.length} tools passed without a browser.`);
 } finally {
   await client?.close();
   await transport?.close();

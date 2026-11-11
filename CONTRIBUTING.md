@@ -10,9 +10,15 @@ package.json is the release unit. Release Please writes versions and mirrors plu
 
 ## Plugin distribution
 
-The Codex plugin is distributed through the existing
+The shared Codex, GitHub Copilot and Claude Code plugin is distributed through the existing
 [`sealad886-codex-marketplace`](https://github.com/sealad886/sealad886-codex-marketplace),
 as `camofox-mcp@sealad886-codex-marketplace`. This repository owns the canonical
 `plugin/` package and npm runtime. Keep marketplace registration in the shared
 repository; do not add a second marketplace catalog here. Installation and setup
 must be verified through the shared marketplace.
+
+The Claude overlay at `plugin/.claude-plugin/plugin.json` shares identity and
+version fields with the portable and Codex manifests. Its inline MCP declaration
+uses `${CLAUDE_PLUGIN_ROOT}` for session-independent startup. All clients load the
+same `plugin/skills/` and runtime scripts. Keep the Claude overlay in Release
+Please's extra-file list and in both npm and standalone plugin artifacts.

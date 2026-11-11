@@ -12,6 +12,7 @@ const readJson = async name => JSON.parse(await readFile(path.join(root, name), 
 const pkg = await readJson('package.json');
 const manifest = await readJson('plugin/plugin.json');
 const overlay = await readJson('plugin/.codex-plugin/plugin.json');
+const claude = await readJson('plugin/.claude-plugin/plugin.json');
 const portableMcp = await readJson('plugin/mcp.json');
 const codexMcp = await readJson('plugin/.mcp.json');
 const releaseConfig = await readJson('release-please-config.json');
@@ -32,7 +33,7 @@ assert.equal(manifest.version, pkg.version, 'npm/plugin version drift');
 assert.deepEqual(overlay.interface, manifest.extensions['com.openai'].interface, 'Plugin presentation drift');
 assert.equal(releaseManifest['.'], pkg.version, 'Release manifest drift');
 const extras = releaseConfig.packages['.']['extra-files'];
-for (const filename of ['plugin/plugin.json', 'plugin/.codex-plugin/plugin.json']) assert(extras.some(extra => extra.type === 'json' && extra.path === filename && extra.jsonpath === '$.version'), `Release Please must mirror ${filename}`);
+for (const filename of ['plugin/plugin.json', 'plugin/.codex-plugin/plugin.json', 'plugin/.claude-plugin/plugin.json']) assert(extras.some(extra => extra.type === 'json' && extra.path === filename && extra.jsonpath === '$.version'), `Release Please must mirror ${filename}`);
 assert.equal(portableMcp.$schema, 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json');
 assert.deepEqual(Object.keys(portableMcp.mcpServers), ['camofox']);
 assert.equal(portableMcp.mcpServers.camofox.type, 'stdio');
@@ -42,6 +43,11 @@ assert.equal(portableMcp.mcpServers.camofox.cwd, '${PLUGIN_ROOT}');
 assert.equal(codexMcp.mcpServers.camofox.command, 'node');
 assert.deepEqual(codexMcp.mcpServers.camofox.args, ['./scripts/launch.mjs']);
 assert.equal(codexMcp.mcpServers.camofox.cwd, '.');
+const identityFields = ['name', 'version', 'description', 'author', 'homepage', 'repository', 'license', 'keywords'];
+assert.deepEqual(claude, {
+  ...Object.fromEntries(identityFields.map(key => [key, overlay[key]])),
+  mcpServers: { camofox: { command: 'node', args: ['${CLAUDE_PLUGIN_ROOT}/scripts/launch.mjs'] } },
+}, 'Claude manifest identity or plugin-root MCP declaration drift');
 
 async function contained(relative) {
   assert(relative.startsWith('./'), `Expected contained relative path: ${relative}`);
@@ -89,4 +95,4 @@ for (const filename of files.filter(name => name.endsWith('.mjs'))) {
   assert.equal(result.status, 0, `${filename}: ${result.stderr}`);
   syntaxCount++;
 }
-console.log(`Package contracts valid; checked ${syntaxCount} JavaScript files, portable/Codex manifests, skill YAML, versions, and contained paths.`);
+console.log(`Package contracts valid; checked ${syntaxCount} JavaScript files, portable/Codex/Claude manifests, skill YAML, versions, and contained paths.`);
