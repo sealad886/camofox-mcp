@@ -20,8 +20,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      pull-requests: read
-      issues: write
+      pull-requests: write
     env:
       RELEASE_VERSION: ${{ inputs.version }}
       NPM_CONFIG_IGNORE_SCRIPTS: 'true'
@@ -79,22 +78,40 @@ jobs:
           import assert from 'node:assert/strict';
           import fs from 'node:fs';
           import { execFileSync } from 'node:child_process';
+          import { setTimeout as delay } from 'node:timers/promises';
           const [pack] = JSON.parse(fs.readFileSync('release-artifacts/pack.json', 'utf8'));
           const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
           const url = `https://registry.npmjs.org/@sealad886%2fcamofox-mcp/${process.env.RELEASE_VERSION}`;
+          function verifyPublished(published) {
+            assert.equal(published.name, '@sealad886/camofox-mcp', 'Published package differs from approved artifact');
+            assert.equal(published.version, process.env.RELEASE_VERSION, 'Published version differs from approved artifact');
+            assert.equal(published.gitHead, sha, 'Published source differs from approved commit');
+            assert.equal(published.dist?.integrity, pack.integrity, 'Published integrity differs from approved artifact');
+          }
           const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
           if (response.ok) {
-            const published = await response.json();
-            assert.equal(published.gitHead, sha, 'Existing version belongs to a different Git commit');
-            assert.equal(published.dist.integrity, pack.integrity, 'Existing version has a different artifact');
+            verifyPublished(await response.json());
             console.log('Exact commit and artifact already published; no publication needed.');
           } else if (response.status === 404) {
             execFileSync('npm', ['publish', `./release-artifacts/${pack.filename}`, '--access', 'public', '--provenance', '--ignore-scripts'], { stdio: 'inherit' });
-            const verified = await fetch(url, { signal: AbortSignal.timeout(30_000) });
-            assert(verified.ok, 'Published version is not yet readable; check registry before rerunning');
-            const published = await verified.json();
-            assert.equal(published.dist.integrity, pack.integrity, 'Published integrity differs from approved artifact');
-            console.log(`Published ${published.name}@${published.version} with matching integrity.`);
+            const deadline = Date.now() + 15 * 60_000;
+            const timeoutMessage = 'Published version did not become readable within 15 minutes; inspect registry before retrying.';
+            for (;;) {
+              const remaining = deadline - Date.now();
+              assert(remaining > 0, timeoutMessage);
+              const verified = await fetch(url, { signal: AbortSignal.timeout(Math.min(30_000, remaining)) });
+              if (verified.ok) {
+                const published = await verified.json();
+                verifyPublished(published);
+                console.log(`Published ${published.name}@${published.version} with matching source and integrity.`);
+                break;
+              }
+              if (verified.status !== 404) throw new Error(`Registry returned ${verified.status} after publication; inspect registry before retrying.`);
+              const wait = Math.min(10_000, deadline - Date.now());
+              assert(wait > 0, timeoutMessage);
+              console.log('npm is processing the publication; waiting for registry visibility.');
+              await delay(wait);
+            }
           } else throw new Error(`Registry returned ${response.status}; refusing to interpret it as a missing version.`);
           JS
       - name: Finalize the verified Release Please publication
